@@ -18,6 +18,9 @@ class DeviceInformationMapper {
       totalRamMb: pluginInfo.memoryInfo.totalPhysicalMemory ~/ (1024 * 1024),
       availableRamMb:
           pluginInfo.memoryInfo.availablePhysicalMemory ~/ (1024 * 1024),
+      totalMemoryMb: pluginInfo.memoryInfo.totalStorageSpace ~/ (1024 * 1024),
+      availableMemoryMb:
+          pluginInfo.memoryInfo.availablePhysicalMemory ~/ (1024 * 1024),
     );
   }
 }

@@ -15,6 +15,9 @@ class DeviceInformation {
   final int totalRamMb;
   final int availableRamMb;
 
+  final int totalMemoryMb;
+  final int availableMemoryMb;
+
   DeviceInformation({
     required this.deviceName,
     required this.manufacturer,
@@ -28,5 +31,7 @@ class DeviceInformation {
     required this.cpuFrequencyMhz,
     required this.totalRamMb,
     required this.availableRamMb,
+    required this.totalMemoryMb,
+    required this.availableMemoryMb,
   });
 }
