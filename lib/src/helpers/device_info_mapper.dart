@@ -14,7 +14,7 @@ class DeviceInformationMapper {
       buildNumber: pluginInfo.buildNumber,
       cpuArchitecture: pluginInfo.processorInfo.architecture,
       cpuCores: pluginInfo.processorInfo.coreCount,
-      cpuFrequencyMhz: pluginInfo.processorInfo.maxFrequency.toDouble(),
+      cpuFrequencyMhz: pluginInfo.processorInfo.maxFrequency,
       totalRamMb: pluginInfo.memoryInfo.totalPhysicalMemory ~/ (1024 * 1024),
       availableRamMb:
           pluginInfo.memoryInfo.availablePhysicalMemory ~/ (1024 * 1024),
