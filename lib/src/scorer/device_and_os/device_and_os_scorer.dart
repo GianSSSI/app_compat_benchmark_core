@@ -4,6 +4,7 @@ import 'package:app_compat_benchmark_core/src/defaults/device_and_os/score/devic
 import 'package:app_compat_benchmark_core/src/defaults/device_and_os/score/device_and_os_scores_set.dart';
 import 'package:app_compat_benchmark_core/src/defaults/device_and_os/weights/device_and_os_weights_defaults_bundle.dart';
 import 'package:app_compat_benchmark_core/src/defaults/device_and_os/weights/device_and_os_weights_set.dart';
+import 'package:flutter/material.dart';
 
 class DeviceAndOsScorer {
   final DeviceAndOsRequirementsSet? deviceAndOsRequirementsSet;
@@ -27,6 +28,7 @@ class DeviceAndOsScorer {
       deviceAndOsWeightsSet ?? DeviceAndOsWeightsDefaultBundle.defaults;
 
   double scoreOSVersion({required double osVersion}) {
+    debugPrint(' BNCH weights types: os=${_weights.os.value.runtimeType}, ');
     if (osVersion < _requirements.osVersion.value) {
       return _scores.incompatible.value;
     }
@@ -34,6 +36,9 @@ class DeviceAndOsScorer {
   }
 
   double scoreCpuArchitecture({required String arch}) {
+    debugPrint(
+      ' BNCH weights types: cpu arch=${_weights.cpuSubArch.value.runtimeType}, ',
+    );
     if (arch == _requirements.archOptimalReq.value) {
       return _scores.dosOptimal.value;
     }
@@ -50,6 +55,9 @@ class DeviceAndOsScorer {
   }
 
   double scoreCpuCores({required int cores}) {
+    debugPrint(
+      ' BNCH weights types: cpu cores =${_weights.cpuSubCore.value.runtimeType}, ',
+    );
     if (cores >= _requirements.coreOptimalReq.value) {
       return _scores.coreOptimal.value;
     }
@@ -63,6 +71,9 @@ class DeviceAndOsScorer {
   }
 
   double scoreCpuFrequency(int mhz) {
+    debugPrint(
+      ' BNCH weights types: CPU freq =${_weights.cpuSubFreq.value.runtimeType}, ',
+    );
     if (mhz >= _requirements.freqOptimalReq.value) {
       return _scores.freqOptimal.value;
     }
@@ -76,6 +87,9 @@ class DeviceAndOsScorer {
   }
 
   double scoreAvailableRamGb(double ramGb) {
+    debugPrint(
+      ' BNCH weights types: ramSubStorage=${_weights.ramSub.value.runtimeType}, ',
+    );
     if (ramGb >= _requirements.ramOptimalReq.value) {
       return _scores.ramOptimal.value;
     }
@@ -89,6 +103,9 @@ class DeviceAndOsScorer {
   }
 
   double scoreAvailableStorageGb(double storageGb) {
+    debugPrint(
+      ' BNCH weights types: storage=${_weights.storageSub.value.runtimeType}, ',
+    );
     if (storageGb >= _requirements.strgOptimalReq.value) {
       return _scores.strgOptimal.value;
     }
@@ -105,6 +122,9 @@ class DeviceAndOsScorer {
     required double ram,
     required double storage,
   }) {
+    debugPrint(
+      ' BNCH weights types: ramStorage=${_weights.ramStorage.value.runtimeType}, ',
+    );
     return ram * _weights.ramSub.value + storage * _weights.storageSub.value;
   }
 
@@ -113,6 +133,7 @@ class DeviceAndOsScorer {
     required double cores,
     required double freq,
   }) {
+    debugPrint(' BNCH weights types: os=${_weights.cpu.value.runtimeType}, ');
     return arch * _weights.cpuSubArch.value +
         cores * _weights.cpuSubCore.value +
         freq * _weights.cpuSubFreq.value;
@@ -123,6 +144,11 @@ class DeviceAndOsScorer {
     required double ramStorage,
     required double cpu,
   }) {
+    debugPrint(
+      ' BNCH weights types: os=${_weights.os.value.runtimeType}, '
+      'ramStorage=${_weights.ramStorage.value.runtimeType}, '
+      'cpu=${_weights.cpu.value.runtimeType}',
+    );
     return os * _weights.os.value +
         ramStorage * _weights.ramStorage.value +
         cpu * _weights.cpu.value;
