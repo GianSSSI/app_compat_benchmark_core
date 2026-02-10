@@ -11,6 +11,7 @@ class BenchmarkRunner {
     required Future<void> Function() action,
     Duration sampleInterval = const Duration(milliseconds: 100),
   }) async {
+    FlutterPerfMonitor.initialize();
     FlutterPerfMonitor.startMonitoring();
 
     final samples = <PerformanceMetrics>[];
