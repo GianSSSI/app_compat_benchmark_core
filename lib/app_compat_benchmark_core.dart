@@ -84,6 +84,8 @@ export '/src/models/performance/benchmark_result.dart';
 export '/src/models/performance/benchmark_step_score.dart';
 export '/src/models/performance/benchmark_step.dart';
 
+export '/src/models/domain/overall_benchmark_score.dart';
+export '/src/models/domain/performance_domain_score.dart';
 //---------------------------MODELS END --------------------------------------
 
 //---------------------------RUNNERS START --------------------------------------
@@ -94,8 +96,9 @@ export '/src/runner/internet_checker_runner.dart';
 //---------------------------RUNNERS END --------------------------------------
 
 //---------------------------SCORERS START  --------------------------------------
-export '/src/scorer/domain_and_os/device_and_os_scorer.dart';
+export 'src/scorer/device_and_os/device_and_os_scorer.dart';
 export '/src/scorer/feature_support/feature_support_scorer.dart';
 export '/src/scorer/performance/benchmark_scorer.dart';
+export '/src/scorer/domain/domain_scorer.dart';
 
 //---------------------------SCORERS START END --------------------------------------
