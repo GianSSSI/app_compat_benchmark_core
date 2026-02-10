@@ -10,7 +10,7 @@ class DeviceInformation {
 
   final String cpuArchitecture;
   final int cpuCores;
-  final double cpuFrequencyMhz;
+  final int cpuFrequencyMhz;
 
   final int totalRamMb;
   final int availableRamMb;
