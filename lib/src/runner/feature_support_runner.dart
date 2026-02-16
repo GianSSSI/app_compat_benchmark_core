@@ -4,6 +4,7 @@ import 'package:app_compat_benchmark_core/src/models/feature_support/feature_ste
 import 'package:app_compat_benchmark_core/src/models/feature_support/feature_support_result.dart';
 import 'package:camera/camera.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FeatureCheckerRunner {
@@ -41,7 +42,7 @@ class FeatureCheckerRunner {
       return FeatureSuppResult(
         stepType: FeatureStepType.camera,
         status: FeatureStatus.ready,
-        message: 'Camerea is Ready and Supported',
+        message: 'Camera is ready and supported',
       );
     } catch (e) {
       return FeatureSuppResult(
@@ -80,13 +81,13 @@ class FeatureCheckerRunner {
         settings = AndroidSettings(
           accuracy: LocationAccuracy.low,
           distanceFilter: 10,
-          timeLimit: Duration(seconds: 3),
+          timeLimit: const Duration(seconds: 3),
         );
       } else if (Platform.isIOS) {
         settings = AppleSettings(
           accuracy: LocationAccuracy.low,
           distanceFilter: 10,
-          timeLimit: Duration(seconds: 3),
+          timeLimit: const Duration(seconds: 3),
         );
       } else {
         settings = const LocationSettings(
@@ -101,7 +102,7 @@ class FeatureCheckerRunner {
       return FeatureSuppResult(
         stepType: FeatureStepType.gps,
         status: FeatureStatus.ready,
-        message: 'Location is Ready and Supported',
+        message: 'Location is ready and supported',
       );
     } catch (e) {
       return FeatureSuppResult(
@@ -111,72 +112,41 @@ class FeatureCheckerRunner {
       );
     }
   }
-  // Future<FeatureCheckResult> checkCamera() async {
-  //   try {
-  //     final cameras = await availableCameras();
-  //     if (cameras.isEmpty) {
-  //       return FeatureCheckResult(FeatureStatus.unsupported);
-  //     }
 
-  //     final permission = await Permission.camera.status;
-  //     if (!permission.isGranted) {
-  //       return FeatureCheckResult(FeatureStatus.permissionDenied);
-  //     }
+  Future<FeatureSuppResult> checkNfc() async {
+    try {
+      if (!Platform.isAndroid && !Platform.isIOS) {
+        return FeatureSuppResult(
+          stepType: FeatureStepType.nfc,
+          status: FeatureStatus.unsupported,
+          message: 'NFC is not supported on this platform',
+          incompatible: true,
+        );
+      }
 
-  //     final controller = CameraController(
-  //       cameras.first,
-  //       ResolutionPreset.low,
-  //       enableAudio: false,
-  //     );
+      final isAvailable = await NfcManager.instance.isAvailable();
 
-  //     await controller.initialize();
-  //     await controller.dispose();
+      if (!isAvailable) {
+        return FeatureSuppResult(
+          stepType: FeatureStepType.nfc,
+          status: FeatureStatus.unsupported,
+          message: 'NFC is not available or disabled on this device',
+          incompatible: true,
+        );
+      }
 
-  //     return FeatureCheckResult(FeatureStatus.ready);
-  //   } catch (e) {
-  //     return FeatureCheckResult(FeatureStatus.runtimeFailed, e.toString());
-  //   }
-  // }
-
-  // Future<FeatureCheckResult> checkLocation() async {
-  //   if (!await Geolocator.isLocationServiceEnabled()) {
-  //     return FeatureCheckResult(FeatureStatus.serviceDisabled);
-  //   }
-
-  //   final permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied ||
-  //       permission == LocationPermission.deniedForever) {
-  //     return FeatureCheckResult(FeatureStatus.permissionDenied);
-  //   }
-
-  //   try {
-  //     final LocationSettings settings;
-
-  //     if (Platform.isAndroid) {
-  //       settings = AndroidSettings(
-  //         accuracy: LocationAccuracy.low,
-  //         distanceFilter: 10,
-  //         timeLimit: Duration(seconds: 3),
-  //       );
-  //     } else if (Platform.isIOS) {
-  //       settings = AppleSettings(
-  //         accuracy: LocationAccuracy.low,
-  //         distanceFilter: 10,
-  //         timeLimit: Duration(seconds: 3),
-  //       );
-  //     } else {
-  //       settings = const LocationSettings(
-  //         accuracy: LocationAccuracy.low,
-  //         distanceFilter: 10,
-  //         timeLimit: Duration(seconds: 3),
-  //       );
-  //     }
-
-  //     await Geolocator.getCurrentPosition(locationSettings: settings);
-
-  //     return FeatureCheckResult(FeatureStatus.ready);
-  //   } catch (e) {
-  //     return FeatureCheckResult(FeatureStatus.runtimeFailed, e.toString());
-  //   }
-  // }
+      return FeatureSuppResult(
+        stepType: FeatureStepType.nfc,
+        status: FeatureStatus.ready,
+        message: 'NFC is available and supported',
+      );
+    } catch (e) {
+      return FeatureSuppResult(
+        stepType: FeatureStepType.nfc,
+        status: FeatureStatus.runtimeFailed,
+        message: e.toString(),
+        incompatible: true,
+      );
+    }
+  }
 }

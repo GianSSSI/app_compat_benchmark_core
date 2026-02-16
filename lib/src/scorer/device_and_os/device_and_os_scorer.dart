@@ -1,120 +1,90 @@
-import 'package:app_compat_benchmark_core/src/defaults/device_and_os/requirements/device_and_os_requirements_defaults.dart';
-import 'package:app_compat_benchmark_core/src/defaults/device_and_os/requirements/device_and_os_requirements_set.dart';
-import 'package:app_compat_benchmark_core/src/defaults/device_and_os/score/device_and_os_scores_bundle.dart';
-import 'package:app_compat_benchmark_core/src/defaults/device_and_os/score/device_and_os_scores_set.dart';
-import 'package:app_compat_benchmark_core/src/defaults/device_and_os/weights/device_and_os_weights_defaults_bundle.dart';
-import 'package:app_compat_benchmark_core/src/defaults/device_and_os/weights/device_and_os_weights_set.dart';
-import 'package:flutter/material.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/defaults/device_and_os_defaults.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/requirements/device_and_os_req_set.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/scores/device_and_os_scores_bundle.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/scores/device_and_os_scores_set.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/weights/device_and_os_weights_set.dart';
 
 class DeviceAndOsScorer {
+  // NEW config sets (nullable for fallback)
   final DeviceAndOsRequirementsSet? deviceAndOsRequirementsSet;
-  final DeviceAndOsScoresSet? deviceAndOsScoresSet;
   final DeviceAndOsWeightsSet? deviceAndOsWeightsSet;
+
+  // KEEP score rubric app-only
+  final DeviceAndOsScoresSet? deviceAndOsScoresSet;
 
   DeviceAndOsScorer({
     this.deviceAndOsRequirementsSet,
-    this.deviceAndOsScoresSet,
     this.deviceAndOsWeightsSet,
+    this.deviceAndOsScoresSet,
   });
 
+  // NEW defaults (from the new system)
   DeviceAndOsRequirementsSet get _requirements =>
-      deviceAndOsRequirementsSet ??
-      DeviceAndOsRequirementsDefaultBundle.defaults;
+      deviceAndOsRequirementsSet ?? DeviceAndOsDefaults();
 
+  DeviceAndOsWeightsSet get _weights =>
+      deviceAndOsWeightsSet ?? DeviceAndOsDefaults();
+
+  // OLD score rubric default (keep)
   DeviceAndOsScoresSet get _scores =>
       deviceAndOsScoresSet ?? DeviceAndOsScoresDefaultBundle.defaults;
 
-  DeviceAndOsWeightsSet get _weights =>
-      deviceAndOsWeightsSet ?? DeviceAndOsWeightsDefaultBundle.defaults;
-
   double scoreOSVersion({required double osVersion}) {
-    debugPrint(' BNCH weights types: os=${_weights.os.value.runtimeType}, ');
-    if (osVersion < _requirements.osVersion.value) {
+    // requirements.osVersion is int now
+    if (osVersion < _requirements.osVersion.toDouble()) {
       return _scores.incompatible.value;
     }
     return _scores.osVersionCompatible.value;
   }
 
   double scoreCpuArchitecture({required String arch}) {
-    debugPrint(
-      ' BNCH weights types: cpu arch=${_weights.cpuSubArch.value.runtimeType}, ',
-    );
-    if (arch == _requirements.archOptimalReq.value) {
-      return _scores.dosOptimal.value;
-    }
-    if (arch == _requirements.archSupportedReq.value) {
-      return _scores.dosSupported.value;
-    }
-    if (arch == _requirements.archLimitedReq.value) {
-      return _scores.dosLimited.value;
-    }
-    if (arch == _requirements.archMinimumReq.value) {
-      return _scores.dosMinimum.value;
-    }
+    final a = _requirements.cpuArchitecture; // TieredStringReq
+
+    if (arch == a.optimal) return _scores.dosOptimal.value;
+    if (arch == a.supported) return _scores.dosSupported.value;
+    if (arch == a.limited) return _scores.dosLimited.value;
+    if (arch == a.minimum) return _scores.dosMinimum.value;
+
     return _scores.incompatible.value;
   }
 
   double scoreCpuCores({required int cores}) {
-    debugPrint(
-      ' BNCH weights types: cpu cores =${_weights.cpuSubCore.value.runtimeType}, ',
-    );
-    if (cores >= _requirements.coreOptimalReq.value) {
-      return _scores.coreOptimal.value;
-    }
-    if (cores >= _requirements.coreSupportedReq.value) {
-      return _scores.coreSupported.value;
-    }
-    if (cores >= _requirements.coreLimitedReq.value) {
-      return _scores.coreLimited.value;
-    }
+    final r = _requirements.cpuCores; // TieredReq
+
+    if (cores >= r.optimal) return _scores.coreOptimal.value;
+    if (cores >= r.supported) return _scores.coreSupported.value;
+    if (cores >= r.limited) return _scores.coreLimited.value;
+
     return _scores.coreMinimum.value;
   }
 
-  double scoreCpuFrequency(int mhz) {
-    debugPrint(
-      ' BNCH weights types: CPU freq =${_weights.cpuSubFreq.value.runtimeType}, ',
-    );
-    if (mhz >= _requirements.freqOptimalReq.value) {
-      return _scores.freqOptimal.value;
-    }
-    if (mhz >= _requirements.freqSupportedReq.value) {
-      return _scores.freqSupported.value;
-    }
-    if (mhz >= _requirements.freqLimitedReq.value) {
-      return _scores.freqLimited.value;
-    }
+  double scoreCpuFrequency({required int mhz}) {
+    final r = _requirements.cpuFrequencyMHz; // TieredReq
+
+    if (mhz >= r.optimal) return _scores.freqOptimal.value;
+    if (mhz >= r.supported) return _scores.freqSupported.value;
+    if (mhz >= r.limited) return _scores.freqLimited.value;
+
     return _scores.freqMinimum.value;
   }
 
-  double scoreAvailableRamGb(double ramGb) {
-    debugPrint(
-      ' BNCH weights types: ramSubStorage=${_weights.ramSub.value.runtimeType}, ',
-    );
-    if (ramGb >= _requirements.ramOptimalReq.value) {
-      return _scores.ramOptimal.value;
-    }
-    if (ramGb >= _requirements.ramSupportedReq.value) {
-      return _scores.ramSupported.value;
-    }
-    if (ramGb >= _requirements.ramLimitedReq.value) {
-      return _scores.ramLimited.value;
-    }
+  double scoreAvailableRamGb({required double ramGb}) {
+    final r = _requirements.ramGB; // TieredReq
+
+    if (ramGb >= r.optimal) return _scores.ramOptimal.value;
+    if (ramGb >= r.supported) return _scores.ramSupported.value;
+    if (ramGb >= r.limited) return _scores.ramLimited.value;
+
     return _scores.ramMinimum.value;
   }
 
-  double scoreAvailableStorageGb(double storageGb) {
-    debugPrint(
-      ' BNCH weights types: storage=${_weights.storageSub.value.runtimeType}, ',
-    );
-    if (storageGb >= _requirements.strgOptimalReq.value) {
-      return _scores.strgOptimal.value;
-    }
-    if (storageGb >= _requirements.strgSupportedReq.value) {
-      return _scores.strgSupported.value;
-    }
-    if (storageGb >= _requirements.strgLimitedReq.value) {
-      return _scores.strgLimited.value;
-    }
+  double scoreAvailableStorageGb({required double storageGb}) {
+    final r = _requirements.storageGB; // TieredReq
+
+    if (storageGb >= r.optimal) return _scores.strgOptimal.value;
+    if (storageGb >= r.supported) return _scores.strgSupported.value;
+    if (storageGb >= r.limited) return _scores.strgLimited.value;
+
     return _scores.strgMinimum.value;
   }
 
@@ -122,10 +92,8 @@ class DeviceAndOsScorer {
     required double ram,
     required double storage,
   }) {
-    debugPrint(
-      ' BNCH weights types: ramStorage=${_weights.ramStorage.value.runtimeType}, ',
-    );
-    return ram * _weights.ramSub.value + storage * _weights.storageSub.value;
+    // weights are doubles now
+    return ram * _weights.ramSub + storage * _weights.storageSub;
   }
 
   double calculateCpuScore({
@@ -133,10 +101,9 @@ class DeviceAndOsScorer {
     required double cores,
     required double freq,
   }) {
-    debugPrint(' BNCH weights types: os=${_weights.cpu.value.runtimeType}, ');
-    return arch * _weights.cpuSubArch.value +
-        cores * _weights.cpuSubCore.value +
-        freq * _weights.cpuSubFreq.value;
+    return arch * _weights.cpuSubArch +
+        cores * _weights.cpuSubCore +
+        freq * _weights.cpuSubFreq;
   }
 
   double calculateDeviceAndOSScore({
@@ -144,13 +111,8 @@ class DeviceAndOsScorer {
     required double ramStorage,
     required double cpu,
   }) {
-    debugPrint(
-      ' BNCH weights types: os=${_weights.os.value.runtimeType}, '
-      'ramStorage=${_weights.ramStorage.value.runtimeType}, '
-      'cpu=${_weights.cpu.value.runtimeType}',
-    );
-    return os * _weights.os.value +
-        ramStorage * _weights.ramStorage.value +
-        cpu * _weights.cpu.value;
+    return os * _weights.os +
+        ramStorage * _weights.ramStorage +
+        cpu * _weights.cpu;
   }
 }

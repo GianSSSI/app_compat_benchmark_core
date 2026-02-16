@@ -1,4 +1,4 @@
-enum FeatureStepType { camera, gps }
+enum FeatureStepType { camera, gps, nfc }
 
 extension FeatureStepTypeX on FeatureStepType {
   bool get isHardBlocker {
@@ -6,6 +6,8 @@ extension FeatureStepTypeX on FeatureStepType {
       case FeatureStepType.camera:
         return true;
       case FeatureStepType.gps:
+        return true;
+      case FeatureStepType.nfc:
         return true;
     }
   }

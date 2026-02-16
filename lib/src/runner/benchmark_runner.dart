@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_perf_monitor/flutter_perf_monitor.dart';
 
 class BenchmarkRunner {
-  /// Runs a single benchmark step
+  //single benchmark step
   Future<BenchmarkStepResult> runStep({
     required BenchmarkStepType step,
     required Future<void> Function() action,
@@ -16,18 +16,15 @@ class BenchmarkRunner {
 
     final samples = <PerformanceMetrics>[];
 
-    // Timer to sample metrics periodically
+    // Timer
     final timer = Timer.periodic(sampleInterval, (_) {
       samples.add(FlutterPerfMonitor.getCurrentMetrics());
     });
 
-    // Run the actual action
     await action();
 
-    // Allow some extra frames to stabilize
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Stop sampling
     timer.cancel();
     FlutterPerfMonitor.stopMonitoring();
 
@@ -60,7 +57,6 @@ class BenchmarkRunner {
     );
   }
 
-  /// REAL scroll benchmark (ListView still renders)
   Future<void> scrollTest(ScrollController controller) async {
     if (!controller.hasClients) return;
 
@@ -153,11 +149,11 @@ class BenchmarkRunner {
                                 Colors
                                     .primaries[(index * 3) %
                                         Colors.primaries.length]
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                                 Colors
                                     .accents[(index * 2) %
                                         Colors.accents.length]
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(
@@ -165,7 +161,7 @@ class BenchmarkRunner {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black..withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),

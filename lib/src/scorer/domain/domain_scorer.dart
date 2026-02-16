@@ -1,46 +1,54 @@
-import 'package:app_compat_benchmark_core/app_compat_benchmark_core.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/defaults/device_and_os_defaults.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/device_and_os/requirements/device_and_os_req_set.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/domain/defaults/domain_defaults.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/domain/score/main_somain_score_set.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/feature_support/defaults/feature_support_default.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/feature_support/requirements/feature_supp_requirements_set.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/perfomance/defaults/performance_default.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/perfomance/requirements/performance_req_set.dart';
 import 'package:app_compat_benchmark_core/src/models/domain/overall_benchmark_score.dart';
 import 'package:app_compat_benchmark_core/src/models/domain/performance_domain_score.dart';
+import 'package:app_compat_benchmark_core/src/models/feature_support/feature_support_score.dart';
 
 class DomainScorer {
-  final PerformanceRequirementsSet? performanceRequirementsSet;
-  final DeviceAndOsRequirementsSet? deviceAndOsRequirementsSet;
-  final OverallScoreRequirementsSet? overallScoreRequirementsSet;
-  final FeatureSupportRequirementsSet? featureSupportRequirementsSet;
-  final DomainWeightsSet? domainWeights;
+  final MainDomainScoresSet?
+  mainDomainScoresSet; // weights of domains + overall thresholds
+  final DeviceAndOsRequirementsSet?
+  deviceAndOsRequirementsSet; // has thresholds
+  final PerformanceRequirementsSet?
+  performanceRequirementsSet; // has thresholds
+  final FeatureSupportRequirementsSet?
+  featureSupportRequirementsSet; // has thresholds
 
   DomainScorer({
-    this.performanceRequirementsSet,
+    this.mainDomainScoresSet,
     this.deviceAndOsRequirementsSet,
-    this.overallScoreRequirementsSet,
+    this.performanceRequirementsSet,
     this.featureSupportRequirementsSet,
-    this.domainWeights,
   });
 
-  DomainWeightsSet get _weights =>
-      domainWeights ?? DomainWeightsDefaultBundle.defaults;
-  OverallScoreRequirementsSet get scoreThresholds =>
-      overallScoreRequirementsSet ??
-      OverallScoreRequirementsDefaultsBundle.defaults;
-  DeviceAndOsRequirementsSet get _deviceOsRequirements =>
-      deviceAndOsRequirementsSet ??
-      DeviceAndOsRequirementsDefaultBundle.defaults;
-  PerformanceRequirementsSet get _perfRequirements =>
-      performanceRequirementsSet ??
-      PerformanceRequirementsDefaultsBundle.defaults;
-  FeatureSupportRequirementsSet get _featSUppRequirements =>
-      featureSupportRequirementsSet ??
-      FeatureSupportRequirementsDefaultsBundle.defaults;
+  // Defaults (NEW)
+  MainDomainScoresSet get _main =>
+      mainDomainScoresSet ?? MainDomainScoresDefaults();
+
+  DeviceAndOsRequirementsSet get _deviceReq =>
+      deviceAndOsRequirementsSet ?? DeviceAndOsDefaults();
+
+  PerformanceRequirementsSet get _perfReq =>
+      performanceRequirementsSet ?? PerformanceDefaults();
+
+  FeatureSupportRequirementsSet get _featReq =>
+      featureSupportRequirementsSet ?? FeatureSupportDefaults();
 
   OverallBenchmarkScore calculateFinalScore({
-    required double device,
+    required double device, // device domain overallScore (0-100)
     required FeatureSupportScore feature,
     required PerformanceDomainScore performance,
   }) {
     final score =
-        device * _weights.deviceAndOs.value +
-        feature.overallScore * _weights.featureSuppport.value +
-        performance.overallScore * _weights.performance.value;
+        device * _main.deviceAndOs +
+        feature.overallScore * _main.featureSupport +
+        performance.overallScore * _main.performance;
 
     final interpretation = interpretDomainScores(
       deviceAndOsScore: device,
@@ -49,6 +57,7 @@ class DomainScorer {
     );
 
     final result = interpretOverallScore(score);
+
     return OverallBenchmarkScore(
       interpretation: interpretation,
       score: score,
@@ -57,11 +66,13 @@ class DomainScorer {
   }
 
   String interpretOverallScore(double overallScore) {
-    if (overallScore >= scoreThresholds.optimalOverall.value) {
+    final t = _main.thresholds; // TieredReq
+
+    if (overallScore >= t.optimal) {
       return "Compatible";
-    } else if (overallScore >= scoreThresholds.supportedOverall.value) {
+    } else if (overallScore >= t.supported) {
       return "Limited Compatible";
-    } else if (overallScore >= scoreThresholds.limitedOverall.value) {
+    } else if (overallScore >= t.limited) {
       return "Partially Compatible";
     } else {
       return "Incompatible";
@@ -76,14 +87,13 @@ class DomainScorer {
     final Map<String, String> interpretations = {};
 
     // DEVICE & OS
-    if (deviceAndOsScore >= _deviceOsRequirements.deviceOsOptimalTotal.value) {
+    final dt = _deviceReq.thresholds; // TieredReq
+    if (deviceAndOsScore >= dt.optimal) {
       interpretations["deviceAndOs"] = "Device & OS meet optimal requirements.";
-    } else if (deviceAndOsScore >=
-        _deviceOsRequirements.deviceOsSupportedTotal.value) {
+    } else if (deviceAndOsScore >= dt.supported) {
       interpretations["deviceAndOs"] =
           "Device & OS are supported but have limitations.";
-    } else if (deviceAndOsScore >=
-        _deviceOsRequirements.deviceOsLimitedTotal.value) {
+    } else if (deviceAndOsScore >= dt.limited) {
       interpretations["deviceAndOs"] = "Device & OS are minimally supported.";
     } else {
       interpretations["deviceAndOs"] =
@@ -91,30 +101,27 @@ class DomainScorer {
     }
 
     // PERFORMANCE
-    if (performanceScore >= _perfRequirements.performanceOptimalTotal.value) {
+    final pt = _perfReq.thresholds; // TieredReq
+    if (performanceScore >= pt.optimal) {
       interpretations["performance"] = "Performance is stable and smooth.";
-    } else if (performanceScore >=
-        _perfRequirements.performanceSupportedTotal.value) {
+    } else if (performanceScore >= pt.supported) {
       interpretations["performance"] =
           "Performance is acceptable with occasional drops.";
-    } else if (performanceScore >=
-        _perfRequirements.performanceLimitedTotal.value) {
+    } else if (performanceScore >= pt.limited) {
       interpretations["performance"] = "Performance may be unstable.";
     } else {
       interpretations["performance"] = "Performance is poor and unreliable.";
     }
 
     // FEATURE SUPPORT
-    if (featureSupportScore >=
-        _featSUppRequirements.featureSuppOptimalTotal.value) {
+    final ft = _featReq.thresholds; // TieredReq
+    if (featureSupportScore >= ft.optimal) {
       interpretations["featureSupport"] =
           "All required features are fully supported.";
-    } else if (featureSupportScore >=
-        _featSUppRequirements.featureSuppSupportedTotal.value) {
+    } else if (featureSupportScore >= ft.supported) {
       interpretations["featureSupport"] =
           "Most required features are supported.";
-    } else if (featureSupportScore >=
-        _featSUppRequirements.featureLimitedTotal.value) {
+    } else if (featureSupportScore >= ft.limited) {
       interpretations["featureSupport"] = "Some required features are missing.";
     } else {
       interpretations["featureSupport"] =

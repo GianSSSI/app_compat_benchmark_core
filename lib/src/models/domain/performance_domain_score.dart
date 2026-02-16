@@ -1,4 +1,5 @@
-import 'package:app_compat_benchmark_core/app_compat_benchmark_core.dart';
+import 'package:app_compat_benchmark_core/src/models/performance/benchmark_result.dart';
+import 'package:app_compat_benchmark_core/src/models/performance/benchmark_step_score.dart';
 
 class PerformanceDomainScore {
   final List<BenchmarkStepScore> stepScores;

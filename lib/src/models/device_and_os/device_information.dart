@@ -9,14 +9,14 @@ class DeviceInformation {
   final String buildNumber;
 
   final String cpuArchitecture;
-  final int cpuCores;
-  final int cpuFrequencyMhz;
+  final double cpuCores;
+  final double cpuFrequencyMhz;
 
-  final int totalRamMb;
-  final int availableRamMb;
+  final double totalRamMb;
+  final double availableRamMb;
 
-  final int totalMemoryMb;
-  final int availableMemoryMb;
+  final double totalMemoryMb;
+  final double availableMemoryMb;
 
   DeviceInformation({
     required this.deviceName,
