@@ -1,4 +1,4 @@
-import 'package:app_compat_benchmark_core/src/defaultsV2/domain/score/main_somain_score_set.dart';
+import 'package:app_compat_benchmark_core/src/defaultsV2/domain/score/main_domain_score_set.dart';
 import 'package:app_compat_benchmark_core/src/models/shared/tiered_req.dart';
 
 class MainDomainScoresDefaults implements MainDomainScoresSet {
